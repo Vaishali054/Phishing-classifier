@@ -26,7 +26,7 @@ class MainUtils:
         
     def read_schema_config_file(self) -> dict:
         try:
-            schema_config=self.read_yaml_file(os.path.join("config", "schema.yaml"))
+            schema_config=self.read_yaml_file(os.path.join("config", "training_schema.yaml"))
 
             return schema_config
         
@@ -105,4 +105,31 @@ class MainUtils:
         
         except Exception as e:
             raise CustomException(e,sys)
+        
+    @staticmethod
+    def identify_feature_types(dataframe: pd.DataFrame):
+        data_types = dataframe.dtypes
+
+        categorical_features = []
+        continuous_features = []
+        discrete_features = []
+
+        for column, dtype in dict(data_types).items():
+            unique_values = dataframe[column].nunique()
+
+            if dtype == 'object' or unique_values < 10:  # Consider features with less than 10 unique values as categorical
+                categorical_features.append(column)
+            elif dtype in [np.int64, np.float64]:  # Consider features with numeric data types as continuous or discrete
+                if unique_values > 20:  # Consider features with more than 20 unique values as continuous
+                    continuous_features.append(column)
+                else:
+                    discrete_features.append(column)
+            else:
+                # Handle other data types if needed
+                pass
+
+        return categorical_features, continuous_features, discrete_features
+        
+
+    
 
