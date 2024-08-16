@@ -23,4 +23,86 @@ class MainUtils:
             
         except Exception as e:
             raise CustomException(e,sys) from e
+        
+    def read_schema_config_file(self) -> dict:
+        try:
+            schema_config=self.read_yaml_file(os.path.join("config", "schema.yaml"))
+
+            return schema_config
+        
+        except Exception as e:
+            raise CustomException(e, sys) from e
+        
+    @staticmethod
+    def save_object(file_path: str, obj: object) -> None:
+        logging.info("Entered the save_object method of MainUtils class")
+
+        try:
+            #writing trained model in binary and dumping in pickle form
+            with open(file_path, "wb") as file_obj:
+                pickle.dump(obj, file_obj)
+
+            logging.info("Exited the save_object method of MainUtils class")
+
+        except Exception as e:
+            raise CustomException(e,sys) from e
+        
+    @staticmethod
+    def load_object(file_path: str, obj: object) -> None:
+        logging.info("Entered the load_object method of MainUtils class")
+
+        try:
+            #loading trained model in binary from pickle
+            with open(file_path, "rb") as file_obj:
+                obj=pickle.load(file_obj)
+
+            logging.info("Exited the load_object method of MainUtils class")
+
+            return obj
+
+        except Exception as e:
+            raise CustomException(e,sys) from e
+        
+    
+    @staticmethod
+    def upload_file(from_filename, to_filename, bucket_name):
+        try:
+            s3_resource=boto3.resource("s3")
+
+            s3_resource.meta.client.upload_file(from_filename, bucket_name, to_filename)
+
+        except Exception as e:
+            raise CustomException(e,sys)
+        
+    @staticmethod
+    def download_model(bucket_name, bucket_file_name, dest_file_name):
+        try:
+            s3_client= boto3.client("s3")
+
+            s3_client.download_file(bucket_name, bucket_file_name, dest_file_name)
+
+            return dest_file_name
+        
+        except Exception as e:
+            raise CustomException(e,sys)
+        
+    @staticmethod
+    def remove_unwanted_spaces(data: pd.DataFrame) -> pd.DataFrame:
+        """
+                      Method Name : remove_unwanted_spaces
+                      Description : This method removes the unwanted spaces from a pandas dataframe.
+                      Output : A pandas DataFrame after removing the spaces.
+                      On Failure : Raise Exception 
+
+        """
+
+        try:
+            df_withput_spaces=data.apply(
+                lambda x: x.str.strip() if x.dtype=="object" else x) #drop the labels speicified in the column
+            logging.info('Unwanted spaces removal Successful. Exited the remove_unwanted_spaces method of the Preprocessor class')
+
+            return df_withput_spaces
+        
+        except Exception as e:
+            raise CustomException(e,sys)
 
